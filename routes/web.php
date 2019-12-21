@@ -12,15 +12,15 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('front.index');
+})->name('front.home');
 
 Auth::routes();
 
 //Fronts Routes
-Route::get('/home', 'HomeController@index');
+/*Route::get('/home', 'HomeController@index');*/
 
-Route::get('/front/home', 'HomeController@front')->name('front.home');
+Route::get('/home', 'HomeController@front');
 
 
 //Partners
@@ -30,10 +30,6 @@ Route::post('/partner-subscription/insert', 'Front\PartnersController@store')->n
 Route::get('/partner-place/{id}', 'Front\PartnersController@partnerPlace')->name('partner-place');
 Route::post('/partner-place/{id}', 'Front\PartnersController@partnerSubscription')->name('partner-subscription-complete');
 
-//Orders
-Route::get('/user-order-review/{id}', 'Front\OrdersController@review')->name('orderReview');
-Route::post('/user-order-review/insert/{id}', 'Front\OrdersController@storeReview')->name('review-insert');
-
 
 //Destination Routes
 Route::get('/city-destination/{city}', 'LocationController@destination')->name('city.destination');
@@ -41,9 +37,11 @@ Route::get('/city-destination/{city}', 'LocationController@destination')->name('
 Route::get('/luggage-storage/{city}', 'LocationController@luggageStorage')->name('luggage-storage');
 //Order
 Route::post('/give-order/{loc_id}', 'OrderController@giveOrder')->name('give-order');
-Route::get('/payment/{last_id}', 'OrderController@payment')->name('payment');
-Route::post('/order-paypal/{id}', 'OrderController@paypal')->name('paypal');
+// Route::get('/payment/{last_id}', 'OrderController@payment')->name('payment');
+// Route::post('/order-paypal/{id}', 'OrderController@paypal')->name('paypal');
 Route::get('/user-order-list', 'OrderController@allOrder')->name('userOrderList');
+Route::get('/user-order-review/{id}', 'OrderController@orderReview')->name('orderReview');
+Route::post('/user-order-review/{order_id}', 'OrderController@reviewStore')->name('review-insert');
 
 
 
@@ -58,3 +56,10 @@ Route::get('partner-signup-old', 'Admin\PartnersController@index')->name('partne
 //Order 
 Route::get('order', 'Admin\OrdersController@create')->name('order-create');
 Route::post('order-insert', 'Admin\OrdersController@store')->name('order-insert');
+
+//Paypal
+Route::get('payment-view/{last_id}', 'PayPalController@paymentView')->name('payment-view');
+Route::get('payment', 'PayPalController@payment')->name('payment');
+Route::get('payment/cancel', 'PayPalController@cancel')->name('payment.cancel');
+Route::get('payment/success', 'PayPalController@success')->name('payment.success');
+Route::post('ipn/notify','PayPalController@postNotify');

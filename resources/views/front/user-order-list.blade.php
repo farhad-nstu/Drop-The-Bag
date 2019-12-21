@@ -28,7 +28,7 @@
     								<td>{{ $order->bag }}</td>
     								<td>{{ $order->price }}</td>
     								<td>
-    									<a href="{{ route('orderReview', $order->id) }}" style="color: red;"><b>Review</b></a>
+    									<a href="{{ route('orderReview', $order->id) }}" style="color: green; font-size: 14px;" role="button"><b>Review</b></a>
     								</td>
     							</tr>
     							@endforeach

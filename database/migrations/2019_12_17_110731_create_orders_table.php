@@ -27,9 +27,10 @@ class CreateOrdersTable extends Migration
             $table->integer('user_id')->nullable();
           
 
-            $table->bigInteger('trx_id')->nullable();
+            $table->string('trx_id')->nullable();
             $table->string('start_timestamp')->nullable();
             $table->string('end_timestamp')->nullable();
+            $table->string('random_code')->nullable();
             $table->timestamps();
         });
     }

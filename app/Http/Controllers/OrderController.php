@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Order;
+use App\Location_detail;
+use Auth;
+use Illuminate\Support\Str;
+use App\Review;
 
 class OrderController extends Controller
 {
@@ -17,15 +21,17 @@ class OrderController extends Controller
     	$end_timestamp = strtotime($end_date_time)-1;
     	$bag = $request->bag;
 
-        /*$sql_order = Order::where(`start_timestamp` <= $start_timestamp and `end_timestamp` >= $end_timestamp)->get();
-        dd($sql_order);
-    	foreach($sql_order as $key => $value){
-		  	$rows[] = $value;
-		}
-
-		if(count($rows) > 0){
+        $sql_order = Order::where('start_timestamp', '<=', $start_timestamp)->where('end_timestamp', '>=', $end_timestamp)->get();
+        // dd($sql_order);
+        $rows = [];
+        $random_code = Str::random(10);
+		if(count($sql_order) > 0){
+			foreach($sql_order as $key => $value){
+			  	$rows[] = $value;
+			  	// dd($rows);
+			}
 			$max_bag = 0;
-			while ( $start_timestamp <= $end_timestamp) {
+			while ( $start_timestamp <= $end_timestamp ) {
 				$temp_max_bag = 0;
 				$temp_end_time = $start_timestamp+899;
 				for ($i=0; $i < count($rows); $i++) { 
@@ -41,13 +47,14 @@ class OrderController extends Controller
 				$start_timestamp = $temp_end_time+1;
 			}
 
-			$sql = Location_detail::where(`loc_id`, $loc_id)->get();
-			foreach($sql as $key => $value){
-				$rows = $value;
-			}
-
-			if($rows > 0){
-				foreach($rows as $key => $value){
+			$sql = Location_detail::where('loc_id', $loc_id)->get();
+			// dd($sql);
+			// foreach($sql as $key => $value){
+			// 	$rows = $value;
+			// }
+			
+			if(count($sql) > 0){
+				foreach($sql as $key => $value){
 					$capacity_of_bag = $value->capacity_of_bag;
 				}
 				if($capacity_of_bag >= $max_bag){
@@ -58,15 +65,15 @@ class OrderController extends Controller
 					$orders->start_timestamp = $start_timestamp;
 					$orders->end_timestamp  = $end_timestamp;
 					$orders->loc_id = $loc_id;
-					$orders->user_id = 10;
+					$orders->user_id = Auth::id();
 					$orders->bag  = $bag;
 					$orders->price = $request->price;
-					$orders->trx_id = 1;
+					$orders->random_code = $random_code;
 					$orders->save();
 
 					if ($orders) {
 						$last_id = $orders->id;
-						return redirect()->route('payment', $last_id);
+						return redirect()->route('payment-view', ['last_id' => $last_id]);
 					} else {
 						echo "error here";
 					}
@@ -75,26 +82,26 @@ class OrderController extends Controller
 					echo 'Not Enough space now.';
 				}
 			}
-	    } else{ */
+	    } else{ 
 			$orders = new Order();
 			$orders->start_date_time = $start_date_time;
 			$orders->end_date_time = $end_date_time;
 			$orders->start_timestamp = $start_timestamp;
 			$orders->end_timestamp  = $end_timestamp;
 			$orders->loc_id = $loc_id;
-			$orders->user_id = 10;
+			$orders->user_id = Auth::id();
 			$orders->bag  = $bag;
 			$orders->price = $request->price;
-			$orders->trx_id = 1;
+			$orders->random_code = $random_code;
 			$orders->save();
 
 			if ($orders) {
 				$last_id = $orders->id;
-				return redirect()->route('payment', $last_id);
+				return redirect()->route('payment-view', ['last_id' => $last_id]);
 			} else {
 				echo "errror here";
 			}
-	    //}
+	    }
     	
     }
 
@@ -102,12 +109,12 @@ class OrderController extends Controller
     {
     	
     	$order_id = $last_id;
-    	$rows = Order::where('id', $order_id)->get();
+    	$row = Order::where('id', $order_id)->first();
     	/*foreach ($rows as $key => $value) {
     		$ids = $value->id;
     	}*/
     	
-    	return view('front.payment', compact('rows'));
+    	return view('front.payment', compact('row'));
     }
 
 
@@ -115,5 +122,25 @@ class OrderController extends Controller
     {
     	$allOrder = Order::all();
     	return view('front.user-order-list', compact('allOrder'));
+    }
+
+    public function orderReview($id)
+    {
+    	$order_id = $id;
+    	return view('front.order-review', compact('order_id'));
+    }
+
+    public function reviewStore(Request $request, $order_id)
+    {
+    	$order_id = $order_id;
+
+    	$reviews = new Review();
+    	/*dd($reviews);*/
+    	$reviews->user_id = 5;
+    	$reviews->order_id = $order_id;
+    	$reviews->star = $request->star;
+    	$reviews->review = $request->review;
+    	$reviews->save();
+    	return redirect('/home');
     }
 }
